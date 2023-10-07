@@ -1,0 +1,19 @@
+version: '3.9'
+
+services:
+
+  # IDTOLU Images Server
+  images-server:
+    container_name: images-server
+    image: images-server:latest
+    environment:
+      - ROOT_PATH_IMAGES=/srv/images
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    ports:
+      - "1995:1995"
+    restart: always
+
+#volumes:
+#  images_server:

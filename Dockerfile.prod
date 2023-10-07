@@ -1,0 +1,24 @@
+# Use the main official rust docker image
+FROM rust:latest AS builder
+
+#RUN apt-get update && apt-get upgrade -y && mkdir /srv/images && apt-get install -y libssl-dev net-tools glibc-source
+
+#Set the work directory
+WORKDIR /app
+
+# Copy the app into the docker image
+COPY . /app
+
+#Build the app
+RUN mkdir /srv/images \
+&& cargo build --release \
+&& cp ./target/release/images_server /usr/local/bin \
+&& rm -r /app/*
+
+EXPOSE 1995
+
+#Start the application
+CMD ["/usr/local/bin/images_server"]
+
+# docker build -f Dockerfile.prod -t negrdo_hotels .
+# docker run -d -p 2004:2004 --name negrdo_hotels negrdo_hotels
