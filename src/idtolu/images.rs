@@ -81,15 +81,6 @@ async fn get_image(request: web::Path<(String,)>) -> Result<NamedFile> {
     Err(ErrorNotFound("404"))
 }
 
-/*fn detect_content_type(file_path: &str) -> &'static str {
-    match file_path.to_lowercase().as_str() {
-        path if path.ends_with(".jpg") || path.ends_with(".jpeg") => "image/jpeg",
-        path if path.ends_with(".png") => "image/png",
-        path if path.ends_with(".svg") => "image/svg+xml",
-        _ => "application/octet-stream", // Tipo de contenido por defecto
-    }
-}*/
-
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(uploads).service(get_image);
 }
