@@ -1,4 +1,4 @@
-use std::{fs::File, io::Write, path::Path, env};
+use std::{env, fs::File, io::Write, path::Path};
 
 use actix_files::NamedFile;
 use actix_multipart::Multipart;
@@ -6,12 +6,11 @@ use actix_web::{
     error::ErrorNotFound, get, http::header::CONTENT_LENGTH, post, web, HttpRequest, HttpResponse,
     Result,
 };
+use dotenvy::dotenv;
 use futures_util::TryStreamExt as _;
-//use image::DynamicImage;
 use mime::{Mime, IMAGE_GIF, IMAGE_JPEG, IMAGE_PNG};
 use serde_json::json;
 use uuid::Uuid;
-use dotenvy::dotenv;
 
 #[post("/uploads")]
 async fn uploads(req: HttpRequest, mut payload: Multipart) -> HttpResponse {
@@ -30,7 +29,6 @@ async fn uploads(req: HttpRequest, mut payload: Multipart) -> HttpResponse {
     }
 
     let image_id = Uuid::new_v4();
-    //let root = "/home/negrdo/images";
 
     if let Ok(Some(mut field)) = payload.try_next().await {
         let path = format!(
