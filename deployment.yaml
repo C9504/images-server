@@ -1,0 +1,49 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: idtolu-images-server
+  namespace: testbed
+  labels:
+    k8s-app: idtolu-images-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: idtolu-images-server
+  template:
+    metadata:
+      name: idtolu-images-server
+      labels:
+        k8s-app: idtolu-images-server
+    spec:
+      containers:
+        - name: idtolu-images-server
+          image: registry.idtolu.net/testbed/images-server:v.0.0.0
+          ports:
+            - containerPort: 1995
+          env:
+            - name: ROOT_PATH_IMAGES
+              value: /srv/images   
+          imagePullPolicy: Always
+          securityContext:
+            privileged: false
+      restartPolicy: Always
+---
+# Service
+kind: Service
+apiVersion: v1
+metadata:
+  name: idtolu-images-server
+  namespace: testbed
+  labels:
+    k8s-app: idtolu-images-server
+spec:
+  ports:
+    - name: images-server
+      protocol: TCP
+      port: 1995
+      targetPort: 1995
+      nodePort: 30995
+  selector:
+    k8s-app: idtolu-images-server
+  type: NodePort
