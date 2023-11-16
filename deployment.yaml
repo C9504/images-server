@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: idtolu-images-server
-          image: registry.idtolu.net/testbed/idtolu-images-server:v0.0.0
+          image: registry.idtolu.net/testbed/idtolu-images-server:<IMAGE_TAG>
           ports:
             - containerPort: 1995
           env:
