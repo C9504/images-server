@@ -1,5 +1,6 @@
 # Use the main official rust docker image
-FROM rust:latest AS builder
+ARG RUST_VERSION=alpine
+FROM rust:${RUST_VERSION} AS builder
 
 #RUN apt-get update && apt-get upgrade -y && mkdir /srv/images && apt-get install -y libssl-dev net-tools glibc-source
 
