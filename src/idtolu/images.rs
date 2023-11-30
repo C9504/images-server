@@ -1,14 +1,22 @@
-use std::{env, fs::File, io::Write, path::Path};
+use std::{
+    env,
+    fs::{self, File},
+    io::Write,
+    path::Path,
+    path::PathBuf
+};
+
+use log::info;
 
 use actix_files::NamedFile;
 use actix_multipart::Multipart;
 use actix_web::{
-    error::ErrorNotFound, get, http::header::CONTENT_LENGTH, post, web, HttpRequest, HttpResponse,
-    Result,
+    delete, error::ErrorNotFound, get, http::header::CONTENT_LENGTH, post, web, HttpRequest,
+    HttpResponse, Result,
 };
 use dotenvy::dotenv;
 use futures_util::TryStreamExt as _;
-use mime::{Mime, IMAGE_GIF, IMAGE_JPEG, IMAGE_PNG};
+use mime::{Mime, IMAGE_GIF, IMAGE_JPEG, IMAGE_PNG, IMAGE_SVG};
 use serde_json::json;
 use uuid::Uuid;
 
@@ -22,7 +30,7 @@ async fn uploads(req: HttpRequest, mut payload: Multipart) -> HttpResponse {
     };
 
     let max_file_size: usize = 900_000;
-    let legal_filetypes: [Mime; 3] = [IMAGE_PNG, IMAGE_JPEG, IMAGE_GIF];
+    let legal_filetypes: [Mime; 4] = [IMAGE_PNG, IMAGE_SVG, IMAGE_JPEG, IMAGE_GIF];
 
     if content_length > max_file_size {
         return HttpResponse::BadRequest().into();
@@ -54,7 +62,7 @@ async fn uploads(req: HttpRequest, mut payload: Multipart) -> HttpResponse {
         while let Ok(Some(chunk)) = field.try_next().await {
             let _ = saved_file.write_all(&chunk).unwrap();
         }
-        println!("{}", path);
+        info!("{}", path);
         return HttpResponse::Ok().json(json!({
             "status": 200,
             "message": "Success",
@@ -72,13 +80,43 @@ async fn uploads(req: HttpRequest, mut payload: Multipart) -> HttpResponse {
 async fn get_image(request: web::Path<(String,)>) -> Result<NamedFile> {
     dotenv().ok();
     let root_path_images = env::var("ROOT_PATH_IMAGES").expect("ROOT_PATH_IMAGES must be set");
-    let file_path = format!("{}/{}", root_path_images, request.into_inner().0);
+    let path = request.into_inner().0;
+    let file_path = PathBuf::from(root_path_images).join(&path);
     if let Ok(file) = NamedFile::open_async(Path::new(&file_path)).await {
         return Ok(file);
     }
     Err(ErrorNotFound("404"))
 }
 
+#[delete("/images/{name}")]
+async fn delete_image(req: web::Path<(String,)>) -> HttpResponse {
+    dotenv().ok();
+    let root_path_images = env::var("ROOT_PATH_IMAGES").expect("ROOT_PATH_IMAGES must be set");
+    let path = req.into_inner().0;
+    let file_path = PathBuf::from(root_path_images).join(& path);
+    if let Ok(file) = NamedFile::open_async(Path::new(&file_path)).await {
+        match fs::remove_file(file.path()) {
+            Ok(_) => HttpResponse::Ok().json(json!({
+                "status": 200,
+                "message": "Deleted",
+            })),
+            Err(e) => HttpResponse::Conflict().json(json!({
+                "status": 200,
+                "message": e.to_string(),
+                "path":  path
+            })),
+        }
+    } else {
+        return HttpResponse::NotFound().json(json!({
+            "status": 404,
+            "message": "Not Found",
+            "path":  ""
+        }));
+    }
+}
+
 pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.service(uploads).service(get_image);
+    cfg.service(uploads)
+        .service(get_image)
+        .service(delete_image);
 }

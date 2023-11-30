@@ -8,6 +8,7 @@ async fn welcome() -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    env_logger::init();
     HttpServer::new(|| {
         /*let keycloak_auth = KeycloakAuth {
             detailed_responses: true,
