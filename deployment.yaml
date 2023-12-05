@@ -1,8 +1,23 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: idtolu-images-server
+  namespace: testbed-ns
+  labels:
+    k8s-app: idtolu-images-server
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: ceph-ext4
+---
 kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: idtolu-images-server
-  namespace: testbed
+  namespace: testbed-ns
   labels:
     k8s-app: idtolu-images-server
 spec:
@@ -16,6 +31,10 @@ spec:
       labels:
         k8s-app: idtolu-images-server
     spec:
+      volumes:
+        - name: idtolu-images
+          persistentVolumeClaim:
+            claimName: idtolu-images-server
       containers:
         - name: idtolu-images-server
           image: registry.idtolu.net/testbed/idtolu-images-server:<IMAGE_TAG>
@@ -23,7 +42,10 @@ spec:
             - containerPort: 1995
           env:
             - name: ROOT_PATH_IMAGES
-              value: /srv/images   
+              value: /srv/images
+          volumeMounts:
+            - name: idtolu-images
+              mountPath: /srv/images
           imagePullPolicy: Always
           securityContext:
             privileged: false
@@ -34,7 +56,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: idtolu-images-server
-  namespace: testbed
+  namespace: testbed-ns
   labels:
     k8s-app: idtolu-images-server
 spec:
