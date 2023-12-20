@@ -15,7 +15,7 @@ Already a pro? Just edit this README.md and make it your own. Want to make it ea
 
 ```
 cd existing_repo
-git remote add origin http://10.0.100.47:8929/cperez/images-server.git
+git remote add origin https://repo.idtolu.net/cperez/images-server.git
 git branch -M main
 git push -uf origin main
 ```
