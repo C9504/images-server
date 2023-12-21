@@ -22,7 +22,7 @@ git push -uf origin main
 
 ## Integrate with your tools
 
-- [ ] [Set up project integrations](http://10.0.100.47:8929/cperez/images-server/-/settings/integrations)
+- [ ] [Set up project integrations](https://repo.idtolu.net/cperez/images-server/-/settings/integrations)
 
 ## Collaborate with your team
 
